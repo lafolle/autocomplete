@@ -17,15 +17,19 @@ const MAX_SUGGESTIONS_COUNT = 10
 // In strict mode only those results are returned whose prefix matches _prefix_
 const STRICT_MODE = true
 
-// If err != nil then len of suggestions is 0.
-func Autocomplete(prefix string) ([]string, error) {
-	suggestions := make([]string, 0, MAX_SUGGESTIONS_COUNT)
-	r := redis.NewClient(&redis.Options{
+var r *redis.Client
+
+func init() {
+	r = redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
 		Password: "",
 		DB:       0,
 	})
+}
 
+// If err != nil then len of suggestions is 0.
+func Autocomplete(prefix string) ([]string, error) {
+	suggestions := make([]string, 0, MAX_SUGGESTIONS_COUNT)
 	// Get rank of prefix
 	rank, err := r.ZRank(ctx, PREFIX_LIST_KEY, prefix).Result()
 	if err == redis.Nil {
